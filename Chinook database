@@ -1,0 +1,228 @@
+--Show Customers (their full names, customer ID, and country) who are not in the US. 
+
+SELECT
+customerid
+,firstname ||' '|| lastname AS fullname
+,country
+FROM customers
+WHERE country <> 'USA';
+
+--Show only the Customers from Brazil.
+
+SELECT
+customerid
+,firstname ||' '|| lastname AS fullname
+,country
+FROM customers
+WHERE country = 'Brazil';
+
+--Find the Invoices of customers who are from Brazil. The resulting table should show the customer's full name, Invoice ID, Date of the invoice, and billing country.
+
+SELECT
+cust.customerid
+,firstname ||' '|| lastname AS fullname
+,country
+,invoiceid
+,invoiceDate
+,billingCountry
+FROM customers AS cust
+LEFT JOIN invoices AS inv
+ON cust.customerid = inv.customerid
+WHERE country = 'Brazil'
+ORDER BY invoiceid;
+
+--Show the Employees who are Sales Agents.
+
+SELECT 
+firstname || ' ' || lastname AS fullname
+,employeeid
+,title
+FROM employees
+WHERE title = 'Sales Support Agent';
+
+--Find a unique/distinct list of billing countries from the Invoice table.
+
+SELECT
+DISTINCT billingcountry
+FROM invoices;
+
+--Provide a query that shows the invoices associated with each sales agent. The resulting table should include the Sales Agent's full name.
+
+SELECT
+emp.firstname || ' ' || emp.lastname AS fullname
+,inv.invoiceid
+FROM employees AS emp
+JOIN customers AS cust
+ON cust.SupportRepID = emp.Employeeid 
+JOIN invoices inv
+ON inv.customerid = cust.customerid;
+
+--Show the Invoice Total, Customer name, Country, and Sales Agent name for all invoices and customers.
+
+SELECT
+cust.firstname || ' ' || cust.lastname AS customername
+,cust.country
+,emp.firstname || ' ' || emp.lastname AS agentname
+,inv.invoiceid
+,total
+FROM invoices AS inv
+JOIN customers AS cust
+ON inv.customerid = cust.customerid
+JOIN employees emp
+ON emp.employeeid = cust.supportRepID;
+
+--How many Invoices were there in 2009?
+
+SELECT COUNT(*)
+FROM Invoices
+WHERE InvoiceDate LIKE '2009%' 
+
+--What are the total sales for 2009;
+
+SELECT
+SUM(total)
+FROM invoices
+WHERE InvoiceDate LIKE '2009%';
+
+--Write a query that includes the purchased track name with each invoice line ID.
+
+SELECT
+tr.name
+,invoicelineid
+FROM tracks AS tr
+JOIN invoice_items inv_it
+ON tr.trackid = inv_it.trackid;
+
+--Write a query that includes the purchased track name AND artist name with each invoice line ID.
+
+SELECT
+tr.name AS track
+,ar.name AS artist
+,inv.invoicelineid
+FROM tracks AS tr
+JOIN invoice_items AS inv
+ON tr.trackid = inv.trackid
+JOIN albums as al
+ON al.albumid = tr.albumid
+JOIN artists as ar
+ON ar.artistid = al.artistid;
+
+--Provide a query that shows all the Tracks, and include the Album name, Media type, and Genre.
+
+SELECT
+tr.name tracks
+,al.title AS albums
+,tr.mediatypeid AS media_type
+,ge.name AS Genre
+FROM tracks AS tr
+JOIN albums AS al
+ON tr.albumid = al.albumid
+JOIN genres ge
+ON ge.genreid = tr.genreid;
+
+--Show the total sales made by each sales agent.
+
+SELECT
+ROUND(SUM(inv.total),2) AS total_sales
+,emp.firstname || ' ' || emp.lastname AS Agent_Name
+FROM employees AS emp
+JOIN customers AS cust
+ON emp.employeeid = cust.supportRepID
+JOIN invoices AS inv
+ON inv.customerid = cust.customerid
+GROUP BY emp.firstname || ' ' || emp.lastname;
+
+---Which sales agent made the most dollars in sales in 2009?
+
+SELECT
+ROUND(SUM(inv.total),2) AS total_sales
+,emp.firstname || ' ' || emp.lastname AS Agent_Name
+FROM employees AS emp
+JOIN customers AS cust
+ON emp.employeeid = cust.supportRepID
+JOIN invoices AS inv
+ON inv.customerid = cust.customerid
+WHERE emp.Title = 'Sales Support Agent' 
+AND Inv.InvoiceDate LIKE '2009%' 
+GROUP BY emp.firstname || ' ' || emp.lastname
+ORDER BY total_sales desc
+LIMIT 1;
+
+--Find all the tracks that have a length of 5,000,000 milliseconds or more.
+
+SELECT
+milliseconds
+,name
+FROM tracks
+WHERE milliseconds >= 5000000;
+
+--Find all the invoices whose total is between $5 and $15 dollars.
+ 
+SELECT
+invoiceid
+,total
+FROM invoices
+WHERE total BETWEEN 5 and 15;
+
+ ---Find all the customers from the following States: RJ, DF, AB, BC, CA, WA, NY.
+ 
+SELECT
+firstname || ' ' || lastname AS 'customer name'
+,state
+FROM customers
+WHERE state IN ('RJ', 'DF' ,'AB', 'BC', 'CA', 'WA', 'NY');
+
+ ---Find all the invoices for customer 56 and 58 where the total was between $1.00 and $5.00.
+ 
+SELECT
+invoiceid
+,customerid
+,total
+FROM invoices
+WHERE invoiceid IN (56, 58)
+AND total BETWEEN 1 AND 5;
+ 
+--Find all the tracks whose name starts with 'All'.
+
+SELECT 
+name
+FROM tracks
+WHERE name LIKE 'All%'
+
+--Find all the customer emails that start with "J" and are from gmail.com.
+
+SELECT
+email
+FROM customers
+WHERE email LIKE 'J%';
+
+-- Find all the invoices from the billing city Brasília, Edmonton, and Vancouver and sort in descending order by invoice ID.
+
+SELECT
+invoiceid
+,billingcity
+FROM invoices
+WHERE billingcity IN ('Brasilia', 'Edmonton', 'Vancouver')
+ORDER BY invoiceid desc
+
+--Show the number of orders placed by each customer (hint: this is found in the invoices table) and sort the result by the number of orders in descending order.
+
+SELECT
+COUNT(invoiceid) AS 'NumberOfOrders'
+,firstname || ' ' || lastname AS 'customer name'
+FROM invoices AS inv
+JOIN customers AS cust
+ON inv.customerid = cust.customerid
+GROUP BY firstname || ' ' || lastname 
+ORDER BY COUNT(invoiceid) desc;
+
+---Find the albums with 12 or more tracks.
+
+SELECT
+title
+,COUNT(trackid) albums
+FROM albums AS al
+JOIN tracks AS tr
+ON al.albumid = tr.albumid
+GROUP BY title
+HAVING COUNT(trackid) = 12;
